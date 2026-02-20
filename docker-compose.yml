@@ -1,0 +1,30 @@
+services:
+  review-service:
+    build: .
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: 3005
+      DATABASE_URL: postgres://postgres:postgres@review-db:5432/review_db
+    depends_on:
+      review-db:
+        condition: service_healthy
+
+  review-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: review_db
+    ports:
+      - "54325:5432"
+    volumes:
+      - review_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  review_db_data:
