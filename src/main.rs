@@ -1,39 +1,7 @@
-use axum::{routing::get, Router};
 use std::net::SocketAddr;
-use tower_http::cors::CorsLayer;
+
+use my_ex_review_service::app;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
-
-mod handlers;
-mod models;
-
-#[derive(OpenApi)]
-#[openapi(
-    paths(
-        handlers::health,
-        handlers::list_reviews,
-        handlers::get_review,
-        handlers::create_review,
-        handlers::dashboard_stats,
-    ),
-    components(schemas(
-        crate::models::CreateReview,
-        crate::models::ReviewResponse,
-        crate::models::DashboardStats,
-    )),
-    info(
-        title = "My EX Review Service API",
-        version = "1.0.0",
-        description = "Review / Analytics microservice API",
-    ),
-    tags(
-        (name = "Health", description = "Health check"),
-        (name = "Reviews", description = "Review CRUD"),
-        (name = "Stats", description = "Dashboard statistics"),
-    )
-)]
-struct ApiDoc;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,14 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     sqlx::migrate!("./migrations").run(&pool).await?;
 
-    let app = Router::new()
-        .route("/health", get(handlers::health))
-        .route("/reviews", get(handlers::list_reviews).post(handlers::create_review))
-        .route("/reviews/:id", get(handlers::get_review))
-        .route("/stats/dashboard", get(handlers::dashboard_stats))
-        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
-        .layer(CorsLayer::permissive())
-        .with_state(pool);
+    let app = app(pool);
 
     let port: u16 = std::env::var("PORT")
         .ok()
