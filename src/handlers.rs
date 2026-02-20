@@ -8,6 +8,13 @@ use uuid::Uuid;
 
 use crate::models::{CreateReview, DashboardStats, Review, ReviewResponse};
 
+/// Health check endpoint.
+#[utoipa::path(
+    get,
+    path = "/health",
+    tag = "Health",
+    responses((status = 200, description = "Service is healthy"))
+)]
 pub async fn health() -> Json<serde_json::Value> {
     Json(serde_json::json!({
         "status": "ok",
@@ -15,6 +22,16 @@ pub async fn health() -> Json<serde_json::Value> {
     }))
 }
 
+/// List all reviews.
+#[utoipa::path(
+    get,
+    path = "/reviews",
+    tag = "Reviews",
+    responses(
+        (status = 200, description = "List of reviews", body = [ReviewResponse]),
+        (status = 500, description = "Internal server error")
+    )
+)]
 pub async fn list_reviews(
     State(pool): State<PgPool>,
 ) -> Result<Json<Vec<ReviewResponse>>, (StatusCode, String)> {
@@ -38,6 +55,18 @@ pub async fn list_reviews(
     ))
 }
 
+/// Get a review by ID.
+#[utoipa::path(
+    get,
+    path = "/reviews/{id}",
+    tag = "Reviews",
+    params(("id" = Uuid, Path, description = "Review UUID")),
+    responses(
+        (status = 200, description = "Review found", body = ReviewResponse),
+        (status = 404, description = "Review not found"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 pub async fn get_review(
     State(pool): State<PgPool>,
     Path(id): Path<Uuid>,
@@ -60,6 +89,17 @@ pub async fn get_review(
     }))
 }
 
+/// Create a new review.
+#[utoipa::path(
+    post,
+    path = "/reviews",
+    tag = "Reviews",
+    request_body = CreateReview,
+    responses(
+        (status = 201, description = "Review created", body = ReviewResponse),
+        (status = 500, description = "Internal server error")
+    )
+)]
 pub async fn create_review(
     State(pool): State<PgPool>,
     Json(body): Json<CreateReview>,
@@ -98,6 +138,16 @@ pub async fn create_review(
     ))
 }
 
+/// Get dashboard statistics (total reviews, average rating).
+#[utoipa::path(
+    get,
+    path = "/stats/dashboard",
+    tag = "Stats",
+    responses(
+        (status = 200, description = "Dashboard stats", body = DashboardStats),
+        (status = 500, description = "Internal server error")
+    )
+)]
 pub async fn dashboard_stats(
     State(pool): State<PgPool>,
 ) -> Result<Json<DashboardStats>, (StatusCode, String)> {

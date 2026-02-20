@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Debug, FromRow)]
@@ -13,7 +14,7 @@ pub struct Review {
     pub created_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateReview {
     pub product_id: Uuid,
     pub user_id: Uuid,
@@ -21,7 +22,7 @@ pub struct CreateReview {
     pub body: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ReviewResponse {
     pub id: Uuid,
     pub product_id: Uuid,
@@ -31,7 +32,7 @@ pub struct ReviewResponse {
     pub created_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct DashboardStats {
     pub total_reviews: u64,
     pub avg_rating: f64,
