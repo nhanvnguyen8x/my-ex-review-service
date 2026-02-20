@@ -1,7 +1,4 @@
-use axum::{
-    routing::{get, post},
-    Router,
-};
+use axum::{routing::get, Router};
 use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -71,6 +68,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or(3005);
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     tracing::info!("Review service listening on {}", addr);
+    tracing::info!("Swagger UI: http://localhost:{}/swagger-ui/", port);
     axum::serve(tokio::net::TcpListener::bind(addr).await?, app).await?;
     Ok(())
 }

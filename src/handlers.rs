@@ -100,10 +100,7 @@ pub async fn get_review(
         (status = 500, description = "Internal server error")
     )
 )]
-pub async fn create_review(
-    State(pool): State<PgPool>,
-    Json(body): Json<CreateReview>,
-) -> Result<(StatusCode, Json<ReviewResponse>), (StatusCode, String)> {
+pub async fn create_review(State(pool): State<PgPool>, Json(body): Json<CreateReview>) -> Result<(StatusCode, Json<ReviewResponse>), (StatusCode, String)> {
     let id = Uuid::new_v4();
     sqlx::query(
         "INSERT INTO reviews (id, product_id, user_id, rating, body) VALUES ($1, $2, $3, $4, $5)",
@@ -148,9 +145,7 @@ pub async fn create_review(
         (status = 500, description = "Internal server error")
     )
 )]
-pub async fn dashboard_stats(
-    State(pool): State<PgPool>,
-) -> Result<Json<DashboardStats>, (StatusCode, String)> {
+pub async fn dashboard_stats(State(pool): State<PgPool>) -> Result<Json<DashboardStats>, (StatusCode, String)> {
     let row = sqlx::query("SELECT COUNT(*) as count FROM reviews")
         .fetch_one(&pool)
         .await
